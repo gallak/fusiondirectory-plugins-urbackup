@@ -1,0 +1,52 @@
+##
+## urbackup-fd.schema - Needed by Fusion Directory for managing urbackup aliases
+## OID 121
+
+# Attributes
+attributetype ( 1.3.6.1.4.1.38414.121.1.1 NAME 'urbackupServerURL'
+        DESC 'FusionDirectory - The urbackup server url'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.38414.121.1.2 NAME 'urbackupServerUser'
+        DESC 'FusionDirectory - The urbackup server user'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.38414.121.1.3 NAME 'urbackupServerPassword'
+        DESC 'FusionDirectory - The urbackup server password'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.38414.121.1.4 NAME 'urbackupAffectationServer'
+        DESC 'FusionDirectory - Urbackup Affectation server'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+
+# Object Class
+objectclass (1.3.6.1.4.1.38414.121.2.1 NAME 'urbackupAlias'
+        DESC 'FusionDirectory - Urbackup alias class'
+        MUST ( cn $ mail $ urbackupServerURL )
+        MAY  ( description ) )
+
+objectclass (1.3.6.1.4.1.38414.121.2.2 NAME 'urbackupServer'
+        SUP top AUXILIARY
+        DESC 'FusionDirectory - Urbackup server'
+        MUST ( urbackupServerURL )
+        MAY ( urbackupServerUser $ urbackupServerPassword ) )
+
+
+objectclass (1.3.6.1.4.1.38414.121.2.3 NAME 'urbackupClient'
+        SUP top AUXILIARY
+        DESC 'FusionDirectory - Urbackup Client'
+        MUST ( urbackupAffectationServer ))
+
