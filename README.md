@@ -1,8 +1,8 @@
 # fusiondirectory-plugins-urbackup
 
-This a plugin wich could connect to the excellentissime urbackup system  https://urbackup.org ( thanks Martin ! you saved some scientist life !!)
-This plugin make the links between FusionDirectory ( http://fusiondirectory.org ) system avec this backup tools.
-Its'nt an alternative to the main web interface of urbackup, just a technical view/action for IT service
+This a plugin wich could connect to the excellent urbackup system  https://urbackup.org ( thanks Martin ! you saved some scientist life !!)
+This plugin make the links between FusionDirectory ( https://www.fusiondirectory.org ) and urbackup.
+it isn't an alternative to the main web interface of urbackup, just a technical view for IT services
 
 ## Reporting
 
@@ -10,12 +10,12 @@ Its allows to follow backup per system / see old backup / current backup
 
 ## Actions
 
-In the futur, it allow to lauch a full / incremental  file/image backup
+In the future, it will allow to lauch a full / incremental  file/image backup
 
 ## licence 
 GPL V3 licence, as usual No warranty
 
-## in the futur
+## in the future
 
-Rewrite neeeded of php library for connecting to urbackup server
-more user friendly screen
+We need to rewrite the php library for connecting to urbackup server
+We need to implement a more user friendly interface
