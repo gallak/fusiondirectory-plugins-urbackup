@@ -1,7 +1,7 @@
 # fusiondirectory-plugins-urbackup
 
-This plugin make the links between (FusionDirectory)[https://www.fusiondirectory.org] 
-and (urbackup urbackup system)[https://urbackup.org] ( thanks Martin ! you saved some scientist life !!).
+This plugin make the links between [FusionDirectory](https://www.fusiondirectory.org) 
+and [urbackup urbackup system](https://urbackup.org) ( thanks Martin ! you saved some scientist life !!).
 It isn't an alternative to the main web interface of urbackup, just a technical view for IT services
 
 ## Reporting
