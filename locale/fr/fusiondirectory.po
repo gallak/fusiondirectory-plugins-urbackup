@@ -2,10 +2,10 @@
 # Copyright (C) YEAR FusionDirectory Project
 # This file is distributed under the same license as the FusionDirectory package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 # Translators:
 # Antoine Gallavardin <antoine.gallavardin@freee.fr>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: FusionDirectory VERSION\n"
@@ -50,3 +50,43 @@ msgstr "Oui"
 msgid "False"
 msgstr "Non"
 
+
+
+msgid "client_version_string"
+msgstr "Version du client"
+
+msgid "delete_pending"
+msgstr "Suppression en attente"
+
+msgid "file_ok"
+msgstr "Sauvegarde fichier"
+
+msgid "groupname"
+msgstr "Groupe"
+
+msgid "image_ok"
+msgstr "Sauvegarde"
+
+msgid "last_filebackup_issues"
+msgstr "Dernier évènement de la sauvegarde fichier"
+
+msgid "lastbackup"
+msgstr "Dernière sauvegarde (fichiers)"
+
+msgid "lastbackup_image"
+msgstr "Dernière sauvegarde (images)"
+
+msgid "lastseen"
+msgstr "Dernière vue"
+
+msgid "name"
+msgstr "Nom"
+
+msgid "online"
+msgstr "En ligne"
+
+msgid "os_simple"
+msgstr "Système"
+
+msgid "os_version_string"
+msgstr "Version du système"
