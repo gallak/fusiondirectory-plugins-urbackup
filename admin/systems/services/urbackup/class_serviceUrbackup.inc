@@ -24,10 +24,10 @@ class serviceUrbackup extends simpleService
   static function plInfo (): array
   {
     return [
-      'plShortName'   => _('Urbackup Server'),
-      'plDescription' => _('Urbackup Server').' ('._('Services').')',
+      'plShortName'   => _('Urbackup Service'),
+      'plDescription' => _('Urbackup Service').' ('._('Services').')',
       'plIcon'        => 'geticon.php?context=applications&icon=urbackup&size=16',
-      'plObjectClass' => ['urbackupServer'],
+      'plObjectClass' => ['fdUrbackupService'],
 
       'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
     ];
@@ -40,19 +40,19 @@ class serviceUrbackup extends simpleService
   {
     return  [
       'main' => [
-        'name'  => _('Urbackup server'),
+        'name'  => _('Urbackup Service'),
         'attrs' => [
           new StringAttribute(
             _('URL'), _('URL to access the urbackup server'),
-            'urbackupServerURL', TRUE
+            'fdUrbackupServiceURL', TRUE
           ),
           new StringAttribute(
             _('User'), _('User to access urbackup server Rest API.'),
-            'urbackupServerUser', FALSE
+            'fdUrbackupServiceUser', FALSE
           ),
           new PasswordAttribute(
             _('Password'), _('Password to access urbackup server Rest API.'),
-            'urbackupServerPassword', FALSE
+            'fdUrbackupServicePassword', FALSE
           )
         ]
       ],
