@@ -53,7 +53,12 @@ private $urbackupDataDictionnary=
                 "size_bytes"            => "bytes",
                 "letter"                => "string",
                 ),
-    );
+            "amount" => array(
+                "files"                 => "string",
+                "images"                => "string",
+                "used"                  => "string"
+                )
+            );
 
 /*private $urbackupType=array( '1' => _("Incremental file backup"),
              '2' => _("Full file backup "),

@@ -2,11 +2,21 @@
   <span class="legend">
     {if $sectionIcon}<img src="{$sectionIcon|escape}" alt=""/>{/if}{$section|escape}
   </span>
-  <div>
-        {foreach $attributes.details_client as $value}
+    <div>
+        {t}Client informations{/t}
+    <div>
+        {foreach $attributes.client_details as $value}
                 {$value}
         {/foreach}
 
-  </div>
-
+    </div>
+</div>
+<div>
+    {t}Client space consumption{/t}
+    <div class="legend">
+        {foreach $attributes.client_consumption as $value}
+            {$value}
+        {/foreach}
+    </div>
+</div>
 </div>

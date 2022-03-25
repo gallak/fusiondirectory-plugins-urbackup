@@ -126,7 +126,8 @@ class urbackupClient extends simplePlugin
                 'attrs' => [
                     new ButtonAttribute(_('Refresh Informations'), _('Update informations'),
                         'fdClientInfos', _('Update'),'submitGetDetails'),
-                    new FakeAttribute('details_client'),
+                    new FakeAttribute('client_details'),
+                    new FakeAttribute('client_consumption'),
                 ],
                 'template' => get_template_path('urbackup_client_details.tpl', TRUE, dirname(__FILE__)),
             ],
@@ -174,8 +175,12 @@ class urbackupClient extends simplePlugin
 
   public function submitGetDetails (){
         $cur_status=$this->urbackupHandler->get_current_client_status();
-        $this->details_client=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
+        $this->client_details=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
             array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')));
+        $cur_details_data=$this->urbackupHandler->get_current_client_usage();
+        $this->client_consumption=$this->urbackupDisplayList(array('amount' => array($cur_details_data)),array( 'amount' =>
+            array('files','images','used')));
+
     }
 
 
@@ -196,6 +201,7 @@ class urbackupClient extends simplePlugin
         $this->is_account     = $this->is_this_account($this->attrs);
         $this->ignore_account = FALSE;
         $this->loadUrbackupData();
+        var_dump($this->urbackupHandler->get_current_client_usage());
     }
 
     function connectUrbackupServer() {
