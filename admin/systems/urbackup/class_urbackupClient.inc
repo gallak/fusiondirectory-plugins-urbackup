@@ -28,42 +28,42 @@
 require_once("urbackup/class_urbackup.php");
 require_once("urbackup/class_urbackupRenderer.php");
 
-  function getAllUrbackupServers()
-  {
-      global $config;
-      $ldap = $config->get_ldap_link();
-      $allUrbackServers=array();
-      $ldap->search('(objectClass=fdUrbackupService)', ['dn','cn','description']);
-      while ($uServer = $ldap->fetch()) {
-      $allUrbackServers[$uServer['dn']]= array(  'urbackupCn' => $uServer['cn'][0],
+function getAllUrbackupServers()
+{
+    global $config;
+    $ldap = $config->get_ldap_link();
+    $allUrbackServers=array();
+    $ldap->search('(objectClass=fdUrbackupService)', ['dn','cn','description']);
+    while ($uServer = $ldap->fetch()) {
+        $allUrbackServers[$uServer['dn']]= array(  'urbackupCn' => $uServer['cn'][0],
                                                     'urbackupDescription' => $uServer['description'][0]);
-      }
-      return($allUrbackServers);
-  }
+    }
+    return($allUrbackServers);
+}
 
 
 
 class UrbackupServerSelectAttribute extends SelectAttribute
 {
-  function setParent (&$plugin)
-  {
-    parent::setParent($plugin);
-    if (is_object($this->plugin)) {
-      $this->updateChoices();
+    function setParent (&$plugin)
+    {
+        parent::setParent($plugin);
+        if (is_object($this->plugin)) {
+            $this->updateChoices();
+        }
     }
-  }
 
-  function updateChoices ()
-  {
-    global $config;
-    $serversName    = [];
-    $serversDescription = [];
-    foreach (getAllUrbackupServers() as $name => $content){
-      $serversDescription[] = $content['urbackupCn']." ".$content['urbackupDescription'];
-      $serversDn[] = $name;
-      $this->setChoices($serversDn, $serversDescription);
+    function updateChoices ()
+    {
+        global $config;
+        $serversName    = [];
+        $serversDescription = [];
+        foreach (getAllUrbackupServers() as $name => $content){
+            $serversDescription[] = $content['urbackupCn']." ".$content['urbackupDescription'];
+            $serversDn[] = $name;
+            $this->setChoices($serversDn, $serversDescription);
+        }
     }
-  }
 }
 
 
@@ -73,213 +73,198 @@ class UrbackupServerSelectAttribute extends SelectAttribute
 class urbackupClient extends simplePlugin
 {
 
-  private $urbackupHandler;
-  protected $displayHeader  = TRUE;
-  protected $loaded = FALSE;
+    private $urbackupHandler;
+    protected $displayHeader  = TRUE;
+    protected $loaded = FALSE;
 
-  static function plInfo (): array
-  {
-    return [
-      'plShortName'   => _('Urbackup'),
-      'plDescription' => _('Urbackup Status'),
-      'plPriority'    => 30,
-      'plObjectType'  => ['workstation'],
-      'plObjectClass'     => ['fdUrbackupClient'],
-      'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
-    ];
-  }
+    static function plInfo (): array
+    {
+        return [
+        'plShortName'   => _('Urbackup'),
+        'plDescription' => _('Urbackup Status'),
+        'plPriority'    => 30,
+        'plObjectType'  => ['workstation'],
+        'plObjectClass'     => ['fdUrbackupClient'],
+        'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
+        ];
+    }
 
-  static function getAttributesInfo (): array
-  {
-    return [
-      'parametrage' => [
-        'name'  => _('Parameter'),
-        'class' => ['fullwidth'],
-        'attrs' => [
-              new StringAttribute(
-            _('Client Alias'), _('Alias of client host'),
-            'fdUrbackupAlias', _('Launch'),FALSE,''),
-                    // choix du server
-            new UrbackupServerSelectAttribute (
-            _('Urbackup Server'),
-            _('Name of server where the client is connected to'),
-            'fdUrbackupServer',
-          ),
-          ]
-        ],
-
-      'hostdetails' => [
-        'name'  => _('Host Details'),
-        'class' => ['fullwidth'],
-        'attrs' => [
-          new ButtonAttribute(
-            _('Refresh Informations'), _('Update informations'),
-            'fdClientInfos', _('Update'),
-            'submitGetDetails'
-          ),
-          new FakeAttribute('details_client'),
+    static function getAttributesInfo (): array
+    {
+        return [
+            'parametrage' => [
+                'name'  => _('Parameter'),
+                'class' => ['fullwidth'],
+                'attrs' => [
+                    new StringAttribute(_('Client Alias'), _('Alias of client host'),
+                        'fdUrbackupAlias', _('Launch'),FALSE,''),
+                    new UrbackupServerSelectAttribute (_('Urbackup Server'),_('Name of server where the client is connected to'),
+                        'fdUrbackupServer'),
+                ]
             ],
-          'template' => get_template_path('urbackup_client_details.tpl', TRUE, dirname(__FILE__)),
-          ],
+            'actions' => [
+                'name'  => _('Actions'),
+                'class' => ['fullwidth'],
+                'attrs' => [
+                    new ButtonAttribute(_('Full Image Backup'), _('Launch Full Image Backup'),
+                        'fdBackupFullImage', _('Launch'),'submitBackupFullImage'),
+                    new ButtonAttribute(_('Incremental Image Backup'), _('Launch Incremental Image Backup'),
+                        'fdBackupIncImage', _('Launch'),'submitBackupIncImage'),
+                    new ButtonAttribute(_('Full File Backup'), _('Launch Full File Backup'),
+                        'fdBackupFullFile', _('Launch'),'submitBackupFullFile'),
+                    new ButtonAttribute(_('Incremental File Backup Backup'), _('Launch Full Image'),
+                        'fdBackupIncFile', _('Launch'),'submitBackupIncFile'),
+                    new ButtonAttribute(_('Refresh Client Informations'), _('Refresh Client Informations'),
+                        'fdClientInfos', _('Refresh Client'),'submitGetDetails'),
+                    new ButtonAttribute(_('Refresh Backups Informations'), _('Refresh backups Informations'),
+                        'fdBackupsInfos', _('Refresh Backups'),'submitGetAllBackups'),
+                ]
+            ],
+            'hostdetails' => [
+                'name'  => _('Host Details'),
+                'class' => ['fullwidth'],
+                'attrs' => [
+                    new ButtonAttribute(_('Refresh Informations'), _('Update informations'),
+                        'fdClientInfos', _('Update'),'submitGetDetails'),
+                    new FakeAttribute('details_client'),
+                ],
+                'template' => get_template_path('urbackup_client_details.tpl', TRUE, dirname(__FILE__)),
+            ],
 
-      'actions' => [
-        'name'  => _('Actions'),
-        'class' => ['fullwidth'],
-        'attrs' => [
+            'backupFiledetails' => [
+                'name'  => _('Backups Files Details'),
+                'class' => ['fullwidth'],
+                'attrs' => [
+                    new FakeAttribute('details_backups'),
+                ],
+                'template' => get_template_path('urbackup_backups_details.tpl', TRUE, dirname(__FILE__)),
+            ],
 
-
-
-
-///  DEBUT BOUTON BACKUP
-          new ButtonAttribute(
-            _('Full Image Backup'), _('Launch Full Image Backup'),
-            'fdBackupFullImage', _('Launch'),
-            'submitBackupFullImage'
-          ),
-          new ButtonAttribute(
-            _('Incremental Image Backup'), _('Launch Incremental Image Backup'),
-            'fdBackupIncImage', _('Launch'),
-            'submitBackupIncImage'
-          ),
-          new ButtonAttribute(
-            _('Full File Backup'), _('Launch Full File Backup'),
-            'fdBackupFullFile', _('Launch'),
-            'submitBackupFullFile'
-          ),
-          new ButtonAttribute(
-            _('Incremental File Backup Backup'), _('Launch Full Image'),
-            'fdBackupIncFile', _('Launch'),
-            'submitBackupIncFile'
-          ),
-///  FIN BOUTON BACKUP
-          new ButtonAttribute(
-            _('Refresh Informations'), _('Update informations'),
-            'fdClientInfos', _('Update'),
-            'submitGetDetails'
-          ),
-
-
-        ]
-      ],
-    ];
-  }
-
-public function loadUrbackupData (){
-    global $config;
-
-    $capabilities = $this->connectUrbackupServer();
-    if (isset($this->attrs['fdUrbackupAlias'][0])){
-        $uClient = $this->attrs['fdUrbackupAlias'][0];
-    }else{
-        $uClient = $this->attrs['cn'][0];
+            'backupImagedetails' => [
+                'name'  => _('Backups Images Details'),
+                'class' => ['fullwidth'],
+                'attrs' => [
+                    new FakeAttribute('details_backup_images'),
+                ],
+                'template' => get_template_path('urbackup_backup_images_details.tpl', TRUE, dirname(__FILE__)),
+            ],
+        ];
     }
 
-    if ($capabilities->success){
-        // fetch All configuration and Data
-        $this->urbackupHandler->get_usage();
-        $this->urbackupHandler->get_status();
-        $this->urbackupHandler->set_current_client($uClient);
-    }else{
-        var_dump("connxion KO");
+    public function loadUrbackupData (){
+        global $config;
+
+        $capabilities = $this->connectUrbackupServer();
+        if (isset($this->attrs['fdUrbackupAlias'][0])){
+            $uClient = $this->attrs['fdUrbackupAlias'][0];
+        }else{
+            $uClient = $this->attrs['cn'][0];
+        }
+
+        if ($capabilities->success){
+            // fetch All configuration and Data
+            $this->urbackupHandler->get_usage();
+            $this->urbackupHandler->get_status();
+            $this->urbackupHandler->set_current_client($uClient);
+        }else{
+            var_dump("connxion KO");
+        }
     }
-}
 
 
   public function submitGetDetails (){
-
         $cur_status=$this->urbackupHandler->get_current_client_status();
         $this->details_client=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
-            array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')),10);
+            array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')));
+    }
+
+
+    public function submitGetAllBackups (){
+        $cur_backups=$this->urbackupHandler->get_current_client_backups();
+        $this->details_backups=$this->urbackupDisplayTable(array('backups' => $cur_backups->backups),array( 'backups' =>
+            array('id','backuptime','size_bytes','incremental','disable_delete','archived')),5);
+        $this->details_backup_images=$this->urbackupDisplayTable(array('backup_images' => $cur_backups->backup_images),array( 'backup_images' =>
+            array('id','backuptime','letter','size_bytes','incremental')),5);
     }
 
 
 
 
-
-  function __construct ($dn = NULL, $object = NULL, $parent = NULL, $mainTab = FALSE)
-  {
-
-    parent::__construct($dn, $object, $parent, $mainTab);
-    $this->is_account     = $this->is_this_account($this->attrs);
-    $this->ignore_account = FALSE;  // affiche l'activation ou pas du plugin
-    $this->loadUrbackupData();
-  }
+    function __construct ($dn = NULL, $object = NULL, $parent = NULL, $mainTab = FALSE)
+    {
+        parent::__construct($dn, $object, $parent, $mainTab);
+        $this->is_account     = $this->is_this_account($this->attrs);
+        $this->ignore_account = FALSE;
+        $this->loadUrbackupData();
+    }
 
     function connectUrbackupServer() {
-
-      global $config;
-      $ldap = $config->get_ldap_link();
-      $ldap->cd($this->fdUrbackupServer);
-      $ldap->search('(objectClass=*)', ['fdUrbackupServiceURL','fdUrbackupServiceUser','fdUrbackupServicePassword']);
-      $attrs = $ldap->fetch();
-      $uServer = $attrs['fdUrbackupServiceURL'][0];
-      $uUser   = $attrs['fdUrbackupServiceUser'][0];
-      $uPass   = $attrs['fdUrbackupServicePassword'][0];
-      //$uClient = $this->attrs['cn'][0];
-      $this->urbackupHandler = new urbackup_service($uServer,$uUser,$uPass);
-      return($this->urbackupHandler->doLogin());
-
+        global $config;
+        $ldap = $config->get_ldap_link();
+        $ldap->cd($this->fdUrbackupServer);
+        $ldap->search('(objectClass=*)', ['fdUrbackupServiceURL','fdUrbackupServiceUser','fdUrbackupServicePassword']);
+        $attrs = $ldap->fetch();
+        $uServer = $attrs['fdUrbackupServiceURL'][0];
+        $uUser   = $attrs['fdUrbackupServiceUser'][0];
+        $uPass   = $attrs['fdUrbackupServicePassword'][0];
+        $this->urbackupHandler = new urbackup_service($uServer,$uUser,$uPass);
+        return($this->urbackupHandler->doLogin());
     }
 
-function urbackupDisplayTable($data,$dict,$size=0){
+    function urbackupDisplayTable($data,$dict,$size=0){
+        $urbackupData = new urbackupDataRenderer();
+        $arrayDiv=array();
+        $smarty = get_smarty();
 
-    $urbackupData = new urbackupDataRenderer();
-    $arrayDiv=array();
-    $smarty = get_smarty();
-
-    foreach ($data as $item => $values){
-        if ($values) {
-            $div = new divSelectBox('rows'.$item);
-            // set height depending values
-            if (! $size){
-                $size = count(array_keys($dict));
-            }
-            $div->setHeight( $size* 26 + 40);
-            $headers=array();
-            foreach ($dict[$item] as $field) {
-                $headers[]=_($field);
-            }
-            $div->setHeaders($headers);
-
-            foreach ($values as &$record) {
-                $fields=array();
-                foreach ($dict[$item] as $field){
-                    $fields[]=[ 'string' => $urbackupData->getRenderValue($urbackupData->getOutputType($item)[$field] ,$record->$field)];
+        foreach ($data as $item => $values){
+            if ($values) {
+                $div = new divSelectBox('rows'.$item);
+                // set height depending values
+                if (! $size){
+                    $size = count(array_keys($dict));
                 }
-                $div->addEntry($fields);
-            }
+                $div->setHeight( $size* 26 + 40);
+                $headers=array();
+                foreach ($dict[$item] as $field) {
+                    $headers[]=_($field);
+                }
+                $div->setHeaders($headers);
+
+                foreach ($values as &$record) {
+                    $fields=array();
+                    foreach ($dict[$item] as $field){
+                        $fields[]=[ 'string' => $urbackupData->getRenderValue($urbackupData->getOutputType($item)[$field] ,$record->$field)];
+                    }
+                    $div->addEntry($fields);
+                }
             $arrayDiv[$item] = $div->drawList();
+            }
         }
-
+        return $arrayDiv;
     }
-    return $arrayDiv;
-}
 
-  function urbackupDisplayList($data,$dict,$size=0){
-    //$id   = $category;
-
-    $urbackupData = new urbackupDataRenderer();
-    $id = array_key_first($dict);
-    $arrayData = (array)$data[$id][0];
-    $div  = new divSelectBox('rows'.$id);
-    $smarty = get_smarty();
-    // take the first element of array data
-    if (! $size){
-        $size = count($dict[$id]);
-    }
-    $div->setHeight($size * 26);
-    $fields=[];
-    $clientInfo=$category;
-      foreach ($dict[$id] as $key ){
-          $fields = [
-             ['string' => _($key)],
-             ['string' => $urbackupData->getRenderValue($urbackupData->getOutputType($id)[$key] ,$arrayData[$key])],
+    function urbackupDisplayList($data,$dict,$size=0){
+        $urbackupData = new urbackupDataRenderer();
+        $id = array_key_first($dict);
+        $arrayData = (array)$data[$id][0];
+        $div  = new divSelectBox('rows'.$id);
+        $smarty = get_smarty();
+        // take the first element of array data
+        if (! $size){
+            $size = count($dict[$id]);
+        }
+        $div->setHeight($size * 26);
+        $fields=[];
+        $clientInfo=$category;
+        foreach ($dict[$id] as $key ){
+            $fields = [
+                ['string' => _($key)],
+                ['string' => $urbackupData->getRenderValue($urbackupData->getOutputType($id)[$key] ,$arrayData[$key])],
             ];
-    $div->addEntry($fields);
-
+            $div->addEntry($fields);
         }
-   return $div->drawList();
-  }
+    return $div->drawList();
+    }
 
 
 

@@ -2,10 +2,11 @@
   <span class="legend">
     {if $sectionIcon}<img src="{$sectionIcon|escape}" alt=""/>{/if}{$section|escape}
   </span>
-  <div>
-        {foreach $attributes.details_client as $value}
+    <div>
+        {foreach $attributes.details_backup_images as $value}
                 {$value}
         {/foreach}
+
 
   </div>
 
