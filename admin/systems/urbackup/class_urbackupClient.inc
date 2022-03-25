@@ -189,7 +189,7 @@ public function loadUrbackupData (){
 
         $cur_status=$this->urbackupHandler->get_current_client_status();
         $this->details_client=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
-            array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')));
+            array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')),10);
     }
 
 
@@ -203,7 +203,6 @@ public function loadUrbackupData (){
     $this->is_account     = $this->is_this_account($this->attrs);
     $this->ignore_account = FALSE;  // affiche l'activation ou pas du plugin
     $this->loadUrbackupData();
-
   }
 
     function connectUrbackupServer() {
@@ -222,7 +221,7 @@ public function loadUrbackupData (){
 
     }
 
-function urbackupDisplayTable($data,$dict){
+function urbackupDisplayTable($data,$dict,$size=0){
 
     $urbackupData = new urbackupDataRenderer();
     $arrayDiv=array();
@@ -232,7 +231,10 @@ function urbackupDisplayTable($data,$dict){
         if ($values) {
             $div = new divSelectBox('rows'.$item);
             // set height depending values
-            $div->setHeight(count(array_keys($values)) * 26 + 40);
+            if (! $size){
+                $size = count(array_keys($dict));
+            }
+            $div->setHeight( $size* 26 + 40);
             $headers=array();
             foreach ($dict[$item] as $field) {
                 $headers[]=_($field);
@@ -241,7 +243,6 @@ function urbackupDisplayTable($data,$dict){
 
             foreach ($values as &$record) {
                 $fields=array();
-                var_dump($record);
                 foreach ($dict[$item] as $field){
                     $fields[]=[ 'string' => $urbackupData->getRenderValue($urbackupData->getOutputType($item)[$field] ,$record->$field)];
                 }
@@ -254,7 +255,7 @@ function urbackupDisplayTable($data,$dict){
     return $arrayDiv;
 }
 
-  function urbackupDisplayList($data,$dict){
+  function urbackupDisplayList($data,$dict,$size=0){
     //$id   = $category;
 
     $urbackupData = new urbackupDataRenderer();
@@ -263,7 +264,10 @@ function urbackupDisplayTable($data,$dict){
     $div  = new divSelectBox('rows'.$id);
     $smarty = get_smarty();
     // take the first element of array data
-    $div->setHeight(count($dict[$id]) * 27);
+    if (! $size){
+        $size = count($dict[$id]);
+    }
+    $div->setHeight($size * 26);
     $fields=[];
     $clientInfo=$category;
       foreach ($dict[$id] as $key ){
