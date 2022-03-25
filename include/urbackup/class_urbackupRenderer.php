@@ -37,7 +37,22 @@ private $urbackupDataDictionnary=
                 "last_filebackup_issues" => "int",
                 "lastbackup"             => "datetime",
                 "lastbackup_image"       => "datetime",
-                )
+                ),
+            "backups" => array(
+                "archived"              => "bool",
+                "backuptime"            => "datetime",
+                "disable_delete"        => "bool",
+                "id"                    => "string",
+                "incremental"           => "string",
+                "size_bytes"            => "bytes",
+                ),
+            "backup_images" => array(
+                "backuptime"            => "datetime",
+                "id"                    => "string",
+                "incremental"           => "string",
+                "size_bytes"            => "bytes",
+                "letter"                => "string",
+                ),
     );
 
 /*private $urbackupType=array( '1' => _("Incremental file backup"),
@@ -67,6 +82,15 @@ private $urbackupDataDictionnary=
     }
 
 
+    function renderBytes($size){
+         $size = $value / 1024 / 1024;
+        return($size." Mo");
+    }
+
+    function renderDateTime($value){
+        return(strftime("%e/%m/%Y - %T",$value));
+    }
+
     function getRenderValue($type='', $value = ''){
         if ( $value ){
             if (is_string($type)){
@@ -79,7 +103,7 @@ private $urbackupDataDictionnary=
                         }
                         break;
                     case "datetime":
-                        return($value);
+                        return($this->renderDateTime($value));
                         break;
                     case "string":
                         return($value);
@@ -93,6 +117,10 @@ private $urbackupDataDictionnary=
                     case "uptime":
                         return($this->renderUptime($value));
                         break;
+                    case "bytes":
+                        return($this->renderBytes($value));
+                        break;
+
                     default:
                         return ($value);
                 }
