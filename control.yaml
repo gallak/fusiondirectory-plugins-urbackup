@@ -1,0 +1,40 @@
+information :
+  name : "urbackup"
+  description : "plugins which allow interacting system and their urbackup configurations"
+  version : "0.1"
+  authors : ['antoine.gallavardin@free.fr']
+  status : "dev"
+  screenshotUrl:
+   - https://github.com/gallak/fusiondirectory-plugins-urbackup/wiki/screenshot1.png
+  logoUrl : https://github.com/gallak/fusiondirectory-plugins-notes/wiki/logo.png
+  tags : ["backup","information","plugin" ]
+  license : "GPLv2"
+  origin : "source"
+
+support :
+  provider : "community"
+  homeUrl : "https://github.com/gallak/fusiondirectory-plugins-urbackup"
+  ticketUrl : "https://github.com/gallak/fusiondirectory-plugins-urbackup/issues"
+  discussionUrl : "https://github.com/gallak/fusiondirectory-plugins-urbackup/wiki"
+  downloadUrl: "https://github.com/gallak/fusiondirectory-plugins-netdisco/archive/refs/heads/main.zip"
+  schemaUrl : "https://schemas.fusiondirectory.info/"
+
+requirement:
+  fdVersion : 1.4
+  phpVersion : 7.2.0
+
+content :
+  phpClassList :
+  ldapObjectList :
+  ldapAttributeList :
+  fileList :
+    - ./contrib/openldap
+    - ./contrib/openldap/urbackup-fd.schema
+    - ./locale/fr/fusiondirectory.po
+    - ./locale/en/fusiondirectory.po
+    - ./admin/systems/urbackup/urbackup_client.tpl
+    - ./admin/systems/urbackup/urbackup_backup.tpl
+    - ./admin/systems/urbackup/class_urbackupClient.inc
+    - ./admin/systems/services/urbackup/class_serviceUrbackup.inc
+    - ./include/urbackup/restclient.php
+    - ./include/urbackup/class_urbackup.php
