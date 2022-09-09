@@ -18,12 +18,6 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// TODO
-// traduction des champs des tableaux urbavkaup
-// respecter les norme de codage de function . variable / champ LDAP
-// ajouter un rendere pour la progress bar
-// message d'erreur en cas de non existence de backup ou client
-
 
 require_once("urbackup/class_urbackup.php");
 require_once("urbackup/class_urbackupRenderer.php");
@@ -94,17 +88,17 @@ class urbackupClient extends simplePlugin
         return [
             'parametrage' => [
                 'name'  => _('Parameter'),
-                'class' => ['fullwidth'],
+                //'class' => ['fullwidth'],
                 'attrs' => [
                     new StringAttribute(_('Client Alias'), _('Alias of client host'),
-                        'fdUrbackupAlias', _('Launch'),FALSE,''),
+                        'fdUrbackupAlias',FALSE,''),
                     new UrbackupServerSelectAttribute (_('Urbackup Server'),_('Name of server where the client is connected to'),
-                        'fdUrbackupServer'),
+                        'fdUrbackupServer',TRUE),
                 ]
             ],
             'actions' => [
                 'name'  => _('Actions'),
-                'class' => ['fullwidth'],
+                //'class' => ['fullwidth'],
                 'attrs' => [
                     new ButtonAttribute(_('Full Image Backup'), _('Launch Full Image Backup'),
                         'fdBackupFullImage', _('Launch'),'submitBackupFullImage'),
@@ -167,19 +161,25 @@ class urbackupClient extends simplePlugin
             $this->urbackupHandler->get_usage();
             $this->urbackupHandler->get_status();
             $this->urbackupHandler->set_current_client($uClient);
-        }else{
-            var_dump("connxion KO");
+            $this->submitGetDetails();
+            $this->submitGetAllBackups();
+
         }
     }
 
 
   public function submitGetDetails (){
         $cur_status=$this->urbackupHandler->get_current_client_status();
-        $this->client_details=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
-            array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image')));
-        $cur_details_data=$this->urbackupHandler->get_current_client_usage();
-        $this->client_consumption=$this->urbackupDisplayList(array('amount' => array($cur_details_data)),array( 'amount' =>
-            array('files','images','used')));
+        if ( $cur_status->success){
+            $this->client_details=$this->urbackupDisplayList(array('status' => array($cur_status)),array( 'status' =>
+                array('client_version_string','online','os_version_string','lastseen','lastbackup','lastbackup_image','last_filebackup_issues')));
+            $cur_details_data=$this->urbackupHandler->get_current_client_usage();
+            $this->client_consumption=$this->urbackupDisplayList(array('amount' => array($cur_details_data)),array( 'amount' =>
+                array('files','images','used')));
+        }else{
+            $error = new FusionDirectoryError(htmlescape(sprintf(_('Error : "%s" . Please contact your administrator.'), $cur_status->message)));
+            $error->display();
+        }
 
     }
 
@@ -199,9 +199,10 @@ class urbackupClient extends simplePlugin
     {
         parent::__construct($dn, $object, $parent, $mainTab);
         $this->is_account     = $this->is_this_account($this->attrs);
-        $this->ignore_account = FALSE;
-        $this->loadUrbackupData();
-        var_dump($this->urbackupHandler->get_current_client_usage());
+        $this->ignore_account = FALSE ;
+	if ( isset($this->attrs['fdUrbackupServer']) ){
+	       	$this->loadUrbackupData();
+	}
     }
 
     function connectUrbackupServer() {
@@ -213,8 +214,15 @@ class urbackupClient extends simplePlugin
         $uServer = $attrs['fdUrbackupServiceURL'][0];
         $uUser   = $attrs['fdUrbackupServiceUser'][0];
         $uPass   = $attrs['fdUrbackupServicePassword'][0];
+
         $this->urbackupHandler = new urbackup_service($uServer,$uUser,$uPass);
-        return($this->urbackupHandler->doLogin());
+        $cnx=$this->urbackupHandler->doLogin();
+        if ( $cnx->success){
+            return($cnx);
+        }else{
+            $error = new FusionDirectoryError(htmlescape(sprintf(_('Error :"%s" . Please contact your administrator.'), $cnx->message)));
+            $error->display();
+        }
     }
 
     function urbackupDisplayTable($data,$dict,$size=0){

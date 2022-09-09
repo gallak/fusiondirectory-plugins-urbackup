@@ -1,8 +1,5 @@
 <?php
 
-# deja declare ?
-#require_once("urbackup/restclient.php");
-
 
 class urbackup_service {
     private $server_url = "";
@@ -42,7 +39,6 @@ class urbackup_service {
         }
     }
 
-
     public function postInformation(string $order,array $params){
         $apiClient = new RestClient();
         // uri builder
@@ -51,9 +47,15 @@ class urbackup_service {
         if(strlen($this->session) > 0){
             $params=array_merge($params,array("ses" => $this->session));
         }
-        $result = $apiClient->post($curr_server_url,$params,$this->headers);
-        $response_json = $result->decode_response();
-        return($response_json);
+        try {
+            $result = $apiClient->post($curr_server_url,$params,$this->headers);
+            return($result->decode_response());
+        } catch (RestClientException $restE){
+            $result->message = "Cannot acces to server";
+            $result->success = false;
+            return($result);
+        }
+
     }
 
     public function getRemoteSalt(){
@@ -61,15 +63,9 @@ class urbackup_service {
     }
 
     public function doLogin() {
-
         // get security information
         $security=$this->getRemoteSalt();
-        if (empty ($security->salt)){
-            $this->debug("CRITICAL","Couldn't get salt for ".$this->username."\n");
-        }
-
         $this->session = $security->ses;
-        // Password encryuption
         $password_md5_bin = md5($security->salt.$this->password,true);
         $password_md5 = utf8_decode(md5($security->salt.$this->password));
         if( $security->pbkdf2_rounds){
@@ -82,9 +78,9 @@ class urbackup_service {
 
         // get session
         $login=$this->postInformation("login",array('username' => $this->username, 'password' => $password_md5));
-
-        if(! isset($login) or $login->success == false){
-            $this->debug("CRITICAL","Couldn't connect for ".$this->username."\n");
+        if ($login->error > 0){
+            $login->message="CRITICAL : Couldn't connect for ".$this->username;
+            $login->success=false;
         }
         return($login);
     }
@@ -95,6 +91,7 @@ class urbackup_service {
 
 
     # test
+    /* INUTILE ???
     public function get_current_client_settings(){
         if ($this->session){
             $params=array("sa"=>"clientsettings", "t_clientid" => $this->current_client_id);
@@ -103,7 +100,7 @@ class urbackup_service {
         }else{
         $this->debug("CRITICAL","User not connected");
         }
-    }
+    }*/
 
     public function set_current_client($clientname){
         $this->current_client_name=$clientname;
@@ -128,31 +125,34 @@ class urbackup_service {
     }
 
     public function get_current_client_status(){
-        $client_found=new stdClass();
-            foreach($this->all_status->status as $client){
-                if ( $client->name == $this->current_client_name ){
-                    $client_found = $client;
-                }
+        $client_search=new stdClass();
+        foreach($this->all_status->status as $client){
+            if ( $client->name == $this->current_client_name ){
+                $client_search = $client;
             }
-            if (count((array)$client_found)> 0){
-                return($client_found);
-            }else{
-                $this->debug("CRITICAL","Client ".$this->current_client_name. " not found");
-            }
+        }            
+        if ( count((array)$client_search) == 0){
+            $client_search->message = "Client ".$this->current_client_name." was not found";
+            $client_search->success = false;
+        }else{
+            $client_search->message = "Client ".$this->current_client_name." si found on Urbackup Server";
+            $client_search->success = true;
+        }
+        return($client_search);
     }
 
     public function get_current_client_usage(){
         $client_found=new stdClass();
-            foreach($this->all_usage->usage as $client){
-                if ( $client->name == $this->current_client_name ){
-                    $client_found = $client;
-                }
+        foreach($this->all_usage->usage as $client){
+            if ( $client->name == $this->current_client_name ){
+                $client_found = $client;
             }
-            if (count((array)$client_found)> 0){
-                return($client_found);
-            }else{
-                $this->debug("CRITICAL","user ".$clientname. " not found");
-            }
+        }
+        if (count((array)$client_found)> 0){
+            return($client_found);
+        }else{
+            $this->debug("CRITICAL","user ".$clientname. " not found");
+        }
     }
 
 
