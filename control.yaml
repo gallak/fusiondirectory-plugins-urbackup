@@ -22,6 +22,7 @@ support :
 requirement:
   fdVersion : 1.4
   phpVersion : 7.2.0
+  pluginsList: ['plugins-common']
 
 content :
   phpClassList :
@@ -36,5 +37,4 @@ content :
     - ./admin/systems/urbackup/urbackup_backup.tpl
     - ./admin/systems/urbackup/class_urbackupClient.inc
     - ./admin/systems/services/urbackup/class_serviceUrbackup.inc
-    - ./include/urbackup/restclient.php
     - ./include/urbackup/class_urbackup.php
